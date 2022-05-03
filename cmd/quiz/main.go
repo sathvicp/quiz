@@ -5,34 +5,47 @@ import (
 	"sathvicp/quiz/internal/args"
 	"sathvicp/quiz/internal/csv"
 	"sathvicp/quiz/internal/structs"
+	"time"
 )
 
 func main() {
 	var tLimit, csvFile = args.ParseArgs()
-	fmt.Printf("%d\n", tLimit)
 
 	score := 0
 
 	problems := csv.GenerateProblems(csvFile)
+	ansChan := make(chan string)
+	var userAnswer string
+
+	timer := time.NewTimer(time.Duration(tLimit) * time.Second)
 
 	for _, problem := range problems {
-		userAnswer := fetchUserAnswer(problem)
-		if checkAnswer(problem, userAnswer) {
-			score++
+		go popQAndGetAns(problem, ansChan)
+		select {
+		case <-timer.C:
+			fmt.Printf("\nTime's up! You scored %d out of %d\n", score, len(problems))
+			return
+		case userAnswer = <-ansChan:
+			checkAnswerAndUpdateScore(problem, userAnswer, &score)
 		}
 	}
 
-	fmt.Printf("\nYour score is %d out of %d\n", score, len(problems))
+	fmt.Printf("\nYou scored %d out of %d\n", score, len(problems))
 }
 
-func fetchUserAnswer(prob structs.Problem) string {
-	fmt.Printf("\nQ: %s\n", prob.Question)
-	fmt.Printf("A: ")
+/*
+Pops a question, fetches the answer and pushes into answer channel
+*/
+func popQAndGetAns(prob structs.Problem, ansChan chan string) {
+	fmt.Printf("Q: %s\nA: ", prob.Question)
 	var userAnswer string
 	fmt.Scanln(&userAnswer)
-	return userAnswer
+	fmt.Println()
+	ansChan <- userAnswer
 }
 
-func checkAnswer(prob structs.Problem, answer string) bool {
-	return answer == prob.Answer
+func checkAnswerAndUpdateScore(prob structs.Problem, answer string, score *int) {
+	if answer == prob.Answer {
+		*score++
+	}
 }
