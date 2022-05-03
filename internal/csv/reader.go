@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"sathvicp/quiz/internal/structs"
+	"strings"
 )
 
 func getReader(filePath string) *csv.Reader {
@@ -28,7 +29,7 @@ func GenerateProblems(filePath string) []structs.Problem {
 	for i, line := range lines {
 		problems[i] = structs.Problem{
 			Question: line[0],
-			Answer:   line[1],
+			Answer:   strings.TrimSpace(line[1]),
 		}
 	}
 
