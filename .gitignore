@@ -2,6 +2,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=go,visualstudiocode
 
 *.csv
+/quiz
 
 ### Go ###
 # If you prefer the allow list template instead of the deny list, see community template:
@@ -13,7 +14,6 @@
 *.dll
 *.so
 *.dylib
-quiz
 
 # Test binary, built with `go test -c`
 *.test
